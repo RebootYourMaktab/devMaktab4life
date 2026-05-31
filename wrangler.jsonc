@@ -1,0 +1,9 @@
+{
+  "name": "maktab4lifeworker",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-05-29",
+
+  "vars": {
+    "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzwZBxxDRv-Ei2Vh7nQwu2MVTW0xqJ6QlKnKcfQnKs0d3L923grvP9TMjiXE_JiU8jJ/exec"
+  }
+}

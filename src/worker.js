@@ -13,7 +13,17 @@ export default {
         version: "1.0"
       });
     }
+    if (url.pathname === "/api/resources/list") {
+  return getResourcesEndpoint(request, env);
+}
 
+if (url.pathname === "/api/student/resources/list") {
+  return getResourcesEndpoint(request, env);
+}
+
+if (url.pathname === "/api/admin/resources/list") {
+  return getResourcesEndpoint(request, env);
+}
    
     
     if (url.pathname === "/api/admin/check-admin") {
@@ -1317,7 +1327,20 @@ async function requireAdminOrSenior(request, env) {
   };
 }
 
+async function getResourcesEndpoint(request, env) {
+  const authUser = await getAuthUser(request, env);
 
+  if (!authUser) {
+    return json({ success: false, error: "Unauthorized" }, 401);
+  }
+
+  const result = await callAppsScript(env, {
+    action: "getStudentResources",
+    data: {}
+  });
+
+  return json(result);
+}
 
 
 async function getAuthUser(request, env) {

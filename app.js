@@ -1,4 +1,4 @@
-const API_BASE = "https://ummedhor.naidu-hajira.workers.dev";
+const API_BASE = "https://ummedhorworker.naidu-hajira.workers.dev";
 
 const state = {
   portalType: null,

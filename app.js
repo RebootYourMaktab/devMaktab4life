@@ -78,7 +78,7 @@ async function checkStudent() {
     const result = await apiPost("/api/check-student", { uniqueid: state.uniqueid });
     if (!result.success) return setError(result.error || "Invalid student link");
     state.user = result.student;
-    document.getElementById("portal-title").innerText = "Student Portal";
+    document.getElementById("portal-title").innerText = "Student Login";
     document.getElementById("portal-subtitle").innerText = `Welcome ${result.student.username}`;
     document.getElementById(result.student.pinsetup ? "login-pin-box" : "setup-pin-box").classList.remove("hidden");
   } catch (err) {
@@ -91,7 +91,7 @@ async function checkAdmin() {
     const result = await apiPost("/api/admin/check-admin", { uniqueid: state.uniqueid });
     if (!result.success) return setError(result.error || "Invalid admin link");
     state.user = result.admin;
-    document.getElementById("portal-title").innerText = "Staff Portal";
+    document.getElementById("portal-title").innerText = "Admin Portal";
     document.getElementById("portal-subtitle").innerText = `${result.admin.username} · ${result.admin.role || "ADMIN"}`;
     document.getElementById(result.admin.pinsetup ? "login-pin-box" : "setup-pin-box").classList.remove("hidden");
   } catch (err) {

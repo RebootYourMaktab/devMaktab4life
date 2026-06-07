@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Ummes Dhor</title>
+  <title>UmmAbbad Academy</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
@@ -16,7 +16,7 @@
     <!-- LOGIN / PIN SCREEN -->
     <section id="auth-screen" class="screen active">
       <img src="/logo.png" alt="UmmAbbad Academy Logo" class="app-logo" />
-      <h1 id="portal-title">UmmeDhor</h1>
+      <h1 id="portal-title">UmmAbbad Academy</h1>
       <p id="portal-subtitle" class="subtitle">Loading portal...</p>
 
       <div id="setup-pin-box" class="auth-box hidden">
@@ -52,6 +52,248 @@
       </div>
 
       <p id="auth-error" class="error-message"></p>
+    </section>
+
+    <!-- STUDENT HOME -->
+    <section id="student-home" class="screen student-theme">
+      <div class="top-bar">
+        <div>
+          <h2>Student Home</h2>
+          <p id="student-welcome" class="mini-text"></p>
+        </div>
+        <button class="small-btn" onclick="logout()">Logout</button>
+      </div>
+
+      <div class="card-grid">
+        <button class="home-card" onclick="showStudentTasks()">
+          <span class="card-icon">▣</span>
+          <span>Tasks</span>
+        </button>
+
+        <button class="home-card" onclick="showPlaceholder('Resources')">
+          <span class="card-icon">▤</span>
+          <span>Resources</span>
+        </button>
+
+        <button class="home-card" onclick="showPlaceholder('Assignments')">
+          <span class="card-icon">▥</span>
+          <span>Assignments</span>
+        </button>
+
+        <button class="home-card" onclick="showPlaceholder('Timetable')">
+          <span class="card-icon">◷</span>
+          <span>Timetable</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ADMIN HOME -->
+    <section id="admin-home" class="screen admin-theme">
+      <div class="top-bar">
+        <div>
+          <h2>Staff Dashboard</h2>
+          <p id="admin-welcome" class="mini-text"></p>
+        </div>
+        <button class="small-btn" onclick="logout()">Logout</button>
+      </div>
+
+      <div class="card-grid">
+       <button class="home-card" onclick="showAdminAcademics()">
+          <span class="card-icon">▧</span>
+          <span>Progress Monitor</span>
+        </button>
+     
+      <button class="home-card" onclick="showAdminAcademics()">
+          <span class="card-icon">▧</span>
+          <span>Academics</span>
+        </button>
+      
+
+      
+     
+        <button class="home-card" onclick="showPlaceholder('Student Records')">
+          <span class="card-icon">▦</span>
+          <span>Student Records</span>
+        </button>
+
+        <button class="home-card" onclick="showPlaceholder('Attendance')">
+          <span class="card-icon">✓</span>
+          <span>Attendance</span>
+        </button>
+ </div>
+       
+    </section>
+
+    <!-- ADMIN ACADEMICS MENU -->
+    <section id="admin-academics" class="screen admin-theme">
+      <div class="nav-header">
+        <h2>Academics</h2>
+        <button class="small-btn" onclick="showScreen('admin-home')">Back</button>
+      </div>
+
+      <div class="list-stack">
+        <button class="list-btn" onclick="showProgressReport()">Progress Tracker</button>
+        <button class="list-btn" onclick="showSubjectsScreen()">Subjects</button>
+         <button class="list-btn" onclick="showPlaceholder('Tasks')">Tasks</button>
+        <button class="list-btn" onclick="showPlaceholder('Resources')">Resources</button>
+       
+        <button class="list-btn" onclick="showPlaceholder('Assign Tasks')">Assign Tasks</button>
+      
+        <button class="list-btn" onclick="showPlaceholder('Timetable')">Timetable</button>
+        <button class="list-btn" onclick="showPlaceholder('Assignments')">Assignments</button>
+      </div>
+    </section>
+
+    <!-- STUDENT TASKS -->
+    <section id="student-tasks" class="screen student-theme">
+      <div class="nav-header">
+        <h2>My Tasks</h2>
+        <button class="small-btn" onclick="showScreen('student-home')">Back</button>
+      </div>
+
+      <div id="student-task-list" class="list-stack">
+        <p class="helper-text">Loading tasks...</p>
+      </div>
+    </section>
+
+    <!-- PROGRESS REPORT -->
+<section id="progress-report" class="screen admin-theme">
+  <div class="nav-header">
+    <h2>Progress</h2>
+    <button class="small-btn" onclick="showScreen('admin-academics')">Back</button>
+  </div>
+
+  <div class="dashboard-section">
+    <h3>Class Progress</h3>
+    <button class="list-btn" onclick="openProgressContext('class', 'ALL')">
+      View Full Class
+    </button>
+  </div>
+
+  <div class="dashboard-section">
+    <h3>Group Progress</h3>
+    <select id="progress-group-select">
+      <option value="">Select a Group...</option>
+    </select>
+    <button class="list-btn" onclick="openSelectedGroupProgress()">
+      View Group
+    </button>
+  </div>
+
+  <div class="dashboard-section">
+    <h3>Individual Progress</h3>
+    <select id="progress-student-select">
+      <option value="">Select a Student...</option>
+    </select>
+    <button class="list-btn" onclick="openSelectedStudentProgress()">
+      View Student
+    </button>
+  </div>
+</section>
+
+<section id="progress-subjects-screen" class="screen admin-theme">
+  <div class="nav-header">
+    <h2 id="progress-subjects-title">Subjects</h2>
+    <button class="small-btn" onclick="showScreen('progress-report')">Back</button>
+  </div>
+
+  <div id="progress-subjects-list" class="list-stack"></div>
+</section>
+
+<section id="progress-tasks-screen" class="screen admin-theme">
+  <div class="nav-header">
+    <h2 id="progress-tasks-title">Tasks</h2>
+    <button class="small-btn" onclick="showScreen('progress-subjects-screen')">Back</button>
+  </div>
+
+  <div id="progress-tasks-list" class="list-stack"></div>
+</section>
+
+<section id="progress-task-students-screen" class="screen admin-theme">
+  <div class="nav-header">
+    <h2 id="progress-task-students-title">Task</h2>
+    <button class="small-btn" onclick="showScreen('progress-tasks-screen')">Back</button>
+  </div>
+
+  <div id="progress-task-students-list" class="list-stack"></div>
+</section>
+
+    
+
+
+    
+    <section id="subjects-screen" class="screen admin-theme">
+         <div class="nav-header">
+            <h2>Subjects</h2>
+    <button class="small-btn" onclick="showScreen('admin-academics')">Back</button>
+  </div>
+
+  <div class="dashboard-section subject-panel">
+       <h3>Add Subjects</h3>
+
+        <div id="subject-add-list" class="subject-add-list"></div>
+
+       <button id="submit-subjects-btn" class="save-btn hidden" onclick="submitPendingSubjects()">
+      Submit Subjects
+    </button>
+
+    <p id="subject-add-message" class="helper-text"></p>
+  </div>
+
+  <div class="dashboard-section subject-panel">
+    <h3>Modify Subject</h3>
+
+    <select id="modify-subject-select" onchange="selectSubjectToModify()">
+      <option value="">Select subject...</option>
+    </select>
+
+   <div id="modify-subject-box" class="hidden">
+  <input id="modify-subject-name" type="text" placeholder="Subject name" />
+
+  <div class="status-action-row">
+    <div id="selected-subject-status" class="status-display">
+      STATUS: -
+    </div>
+
+    <button
+      id="toggle-subject-status-btn"
+      class="status-toggle-btn"
+      onclick="toggleSubjectStatusLocal()"
+    >
+      Change Status
+    </button>
+  </div>
+
+  <button class="save-btn" onclick="saveSubjectChanges()">
+    Save These Changes
+  </button>
+</div>
+  </div>
+</section>
+
+<section id="teacher-student-tasks" class="screen admin-theme">
+  <div class="nav-header">
+    <h2 id="teacher-student-tasks-title">Student Tasks</h2>
+    <button class="small-btn" onclick="showScreen('progress-report')">Back</button>
+  </div>
+
+  <div id="teacher-student-task-list" class="list-stack">
+    <p class="helper-text">Loading student tasks...</p>
+  </div>
+</section>
+    
+
+    
+    <!-- PLACEHOLDER SCREEN -->
+    <section id="placeholder-screen" class="screen">
+      <div class="nav-header">
+        <h2 id="placeholder-title">Screen</h2>
+        <button class="small-btn" onclick="goHome()">Back</button>
+      </div>
+
+      <div class="dashboard-section">
+        <p class="helper-text">This screen will be connected next.</p>
+      </div>
     </section>
 
   </main>

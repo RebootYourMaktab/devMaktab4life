@@ -201,12 +201,3 @@ function goHome() {
   }
 }
 
-function showPlaceholder(title) {
-  document.getElementById("placeholder-title").innerText = title;
-  showScreen("placeholder-screen");
-}
-
-function showAdminAcademics() {
-  showScreen("admin-academics");
-}
-

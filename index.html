@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Umme Dhor</title>
+  <title>Umme Hifdh Record</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
@@ -10,8 +10,8 @@
 <body>
   <main class="app-shell">
     <section id="auth-screen" class="screen active">
-      <img src="/logo.png" alt="Umme Dhor Logo" class="app-logo" />
-      <h1 id="portal-title">Umme Dhor</h1>
+      <img src="/logo.png" alt="Umme Hifdh Logo" class="app-logo" />
+      <h1 id="portal-title">Umme Hifdh Record</h1>
       <p id="portal-subtitle" class="subtitle">Loading portal...</p>
 
       <div id="setup-pin-box" class="auth-box hidden">
@@ -33,18 +33,20 @@
 
     <section id="dhor-form-screen" class="screen">
       <div class="nav-header">
-        <h2 id="dhor-form-title">Record Dhor</h2>
+        <h2 id="dhor-form-title">Umme Hifdh Record</h2>
         <button class="small-btn" onclick="logout()">Logout</button>
       </div>
 
-      <div class="dashboard-section form-panel">
-        <input id="dhor-id" type="hidden" />
+      <div class="dashboard-section form-panel" id="dhor-form-panel">
+        <input id="dhor-studentid" type="hidden" />
+        <input id="dhor-username-hidden" type="hidden" />
+        <input id="dhor-verify-status" type="hidden" value="Pending" />
 
         <label for="dhor-date">Date</label>
         <input id="dhor-date" type="date" />
 
-        <label id="dhor-username-label" for="dhor-username">Name</label>
-        <input id="dhor-username" type="text" placeholder="Name" />
+        <label for="dhor-display-name">Name</label>
+        <input id="dhor-display-name" type="text" readonly />
 
         <label for="dhor-portion">Portion</label>
         <select id="dhor-portion"></select>
@@ -61,13 +63,13 @@
         </div>
 
         <label for="dhor-comments">Comments</label>
-        <textarea id="dhor-comments" rows="4" placeholder="Notes about fluency, mistakes, or revision..."></textarea>
+        <textarea id="dhor-comments" rows="3" placeholder="Notes about fluency, mistakes, or revision..."></textarea>
 
-        <div id="admin-verification-box" class="verification-section hidden">
+        <div id="admin-verification-box" class="verification-box hidden">
           <label>Verification</label>
           <div class="verification-row">
-            <button id="verify-needs-work" type="button" class="verify-choice-btn" onclick="selectVerifyStatus('Needs Review')">Needs Work</button>
-            <button id="verify-tops" type="button" class="verify-choice-btn" onclick="selectVerifyStatus('Verified')">Tops Alhamdulillah</button>
+            <button type="button" id="verify-needs-work" class="verify-choice-btn" onclick="chooseVerifyStatus('Needs Work')">Needs Work</button>
+            <button type="button" id="verify-tops" class="verify-choice-btn" onclick="chooseVerifyStatus('Tops Alhamdullilah')">Tops Alhamdullilah</button>
           </div>
         </div>
 
@@ -79,17 +81,8 @@
     <section id="dhor-list-screen" class="screen">
       <div class="nav-header">
         <h2 id="dhor-list-title">Dhor Progress</h2>
-        <button class="small-btn" onclick="openDhorForm()">Back</button>
+        <button class="small-btn" onclick="openDhorForm()">Record</button>
       </div>
-
-      <div id="admin-filter-box" class="dashboard-section hidden">
-        <label for="admin-username-filter">Filter by name</label>
-        <div class="filter-row">
-          <input id="admin-username-filter" type="text" placeholder="Leave blank for all students" />
-          <button class="small-btn" onclick="loadDhorRecords()">Filter</button>
-        </div>
-      </div>
-
       <div id="dhor-summary" class="summary-grid"></div>
       <div id="dhor-record-list" class="list-stack"><p class="helper-text">Loading...</p></div>
     </section>

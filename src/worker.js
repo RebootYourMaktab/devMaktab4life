@@ -14,6 +14,7 @@ export default {
       if (url.pathname === "/api/admin/setup-pin") return setupAdminPin(request, env);
       if (url.pathname === "/api/admin/login") return adminLogin(request, env);
 
+      if (url.pathname === "/api/dhor/default-student") return getDefaultDhorStudent(request, env);
       if (url.pathname === "/api/dhor/portions") return listDhorPortions(request, env);
       if (url.pathname === "/api/dhor/list") return listDhorProgress(request, env);
       if (url.pathname === "/api/dhor/save") return saveDhorProgress(request, env);
@@ -143,6 +144,15 @@ async function adminLogin(request, env) {
   return json({ success: true, token, admin: { adminid: admin.adminid, username: admin.username, role: admin.role, assignedgroup: admin.assignedgroup } });
 }
 
+
+async function getDefaultDhorStudent(request, env) {
+  const authUser = await requireAdmin(request, env);
+  if (!authUser.ok) return authUser.response;
+  const body = await request.json().catch(() => ({}));
+  const studentid = String(body.studentid || "HIFDH1").trim();
+  return json(await callAppsScript(env, { action: "getDefaultDhorStudent", data: { studentid } }));
+}
+
 async function listDhorPortions(request, env) {
   const authUser = await requireAuth(request, env);
   if (!authUser.ok) return authUser.response;
@@ -167,8 +177,10 @@ async function saveDhorProgress(request, env) {
   if (!authUser.ok) return authUser.response;
   const body = await request.json();
 
+  let verifyStatus = String(body.verifyStatus || "Pending").trim();
+  if (authUser.user.type !== "admin") verifyStatus = "Pending";
+
   const record = {
-    dhorid: String(body.dhorid || "").trim(),
     date: String(body.date || "").trim(),
     portionid: String(body.portionid || "").trim(),
     quarterjuzname: String(body.quarterjuzname || "").trim(),
@@ -176,12 +188,9 @@ async function saveDhorProgress(request, env) {
     readingMinutes: Number(body.readingMinutes || 0),
     comments: String(body.comments || "").trim(),
     username: authUser.user.type === "student" ? authUser.user.username : String(body.username || "").trim(),
-    verifyStatus: authUser.user.type === "student" ? String(body.verifyStatus || "Pending") : String(body.verifyStatus || "Pending")
+    verifyStatus,
+    adminUserName: authUser.user.type === "admin" && verifyStatus !== "Pending" ? String(authUser.user.username || "").trim() : ""
   };
-
-  if (authUser.user.type === "student" && record.verifyStatus === "Verified") {
-    record.verifyStatus = "Pending";
-  }
 
   if (!record.date) return json({ success: false, error: "Date is required" }, 400);
   if (!record.portionid) return json({ success: false, error: "Portion is required" }, 400);
@@ -196,7 +205,8 @@ async function verifyDhorProgress(request, env) {
   const body = await request.json();
   const data = {
     dhorid: String(body.dhorid || "").trim(),
-    verifyStatus: String(body.verifyStatus || "Pending").trim()
+    verifyStatus: String(body.verifyStatus || "Pending").trim(),
+    adminUserName: String(authUser.user.username || "").trim()
   };
   return json(await callAppsScript(env, { action: "setDhorVerifyStatus", data }));
 }

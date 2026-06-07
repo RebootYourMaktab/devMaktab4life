@@ -32,7 +32,7 @@ function initApp() {
     return;
   }
 
-  document.getElementById("portal-title").innerText = "UmmAbbad Academy";
+  document.getElementById("portal-title").innerText = "Ummes Dhor Record";
   document.getElementById("portal-subtitle").innerText =
     "Please open your personal login link.";
 }

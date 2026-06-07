@@ -1,7 +1,7 @@
 {
   "name": "ummedhorworker",
   "main": "src/worker.js",
-  "compatibility_date": "2026-05-29",
+  "compatibility_date": "2026-06-07",
 
   "vars": {
     "APPS_SCRIPT_URL": "https://script.google.com/macros/s/AKfycbzxIu4yEW53Y02v0EmnzZUAEkNAFuDoj85FRdoyiHdidXcGLCLUdiVnXlEXPcKVaXBf/exec"

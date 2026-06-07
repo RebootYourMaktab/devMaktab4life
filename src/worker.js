@@ -4,7 +4,7 @@ export default {
 
     try {
       if (request.method === "OPTIONS") return corsResponse();
-      if (url.pathname === "/") return json({ success: true, service: "ummedhor-worker", version: "1.0" });
+      if (url.pathname === "/") return json({ success: true, service: "ummedhor-worker", version: "1.1" });
 
       if (url.pathname === "/api/check-student") return checkStudent(request, env);
       if (url.pathname === "/api/setup-pin") return setupStudentPin(request, env);
@@ -40,6 +40,7 @@ async function checkStudent(request, env) {
     student: {
       studentid: result.student.studentid,
       username: result.student.username,
+      name: result.student.name || result.student.username || result.student.studentid,
       classgroup: result.student.classgroup,
       pinsetup: result.student.pinsetup === true
     }
@@ -77,10 +78,11 @@ async function studentLogin(request, env) {
     type: "student",
     studentid: student.studentid,
     username: student.username,
+    name: student.name || student.username || student.studentid,
     classgroup: student.classgroup
   }, env);
 
-  return json({ success: true, token, student: { studentid: student.studentid, username: student.username, classgroup: student.classgroup } });
+  return json({ success: true, token, student: { studentid: student.studentid, username: student.username, name: student.name || student.username || student.studentid, classgroup: student.classgroup } });
 }
 
 async function checkAdmin(request, env) {
@@ -155,8 +157,8 @@ async function listDhorProgress(request, env) {
   const body = await request.json().catch(() => ({}));
 
   const data = authUser.user.type === "student"
-    ? { scope: "mine", username: authUser.user.username }
-    : { scope: "all", username: String(body.username || "").trim() };
+    ? { scope: "mine", name: authUser.user.name || authUser.user.username || authUser.user.studentid }
+    : { scope: "all", name: String(body.name || body.username || "").trim() };
 
   const result = await callAppsScript(env, { action: "listDhorProgress", data });
   return json(result);
@@ -175,17 +177,13 @@ async function saveDhorProgress(request, env) {
     mistakesNumber: Number(body.mistakesNumber || 0),
     readingMinutes: Number(body.readingMinutes || 0),
     comments: String(body.comments || "").trim(),
-    username: authUser.user.type === "student" ? authUser.user.username : String(body.username || "").trim(),
-    verifyStatus: authUser.user.type === "student" ? String(body.verifyStatus || "Pending") : String(body.verifyStatus || "Pending")
+    name: authUser.user.type === "student" ? (authUser.user.name || authUser.user.username || authUser.user.studentid) : String(body.name || body.username || "").trim(),
+    verifyStatus: authUser.user.type === "student" ? "Pending" : String(body.verifyStatus || "Pending").trim()
   };
-
-  if (authUser.user.type === "student" && record.verifyStatus === "Verified") {
-    record.verifyStatus = "Pending";
-  }
 
   if (!record.date) return json({ success: false, error: "Date is required" }, 400);
   if (!record.portionid) return json({ success: false, error: "Portion is required" }, 400);
-  if (!record.username) return json({ success: false, error: "Username is required" }, 400);
+  if (!record.name) return json({ success: false, error: "Name is required" }, 400);
 
   return json(await callAppsScript(env, { action: "saveDhorProgress", data: record }));
 }

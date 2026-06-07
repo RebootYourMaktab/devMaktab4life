@@ -269,3 +269,49 @@ button:active { transform: scale(0.98); }
   .top-bar, .nav-header { align-items: flex-start; }
   .small-btn { min-width: 84px; }
 }
+
+
+.screen-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
+.verify-choice-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 8px 0 14px;
+}
+
+.verify-choice-btn,
+.emoji-btn {
+  font-family: Arial, sans-serif;
+  letter-spacing: 0;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  min-height: 62px;
+}
+
+.verify-choice-btn span,
+.emoji-btn span {
+  font-size: 0.78rem;
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+}
+
+.verify-choice-btn.selected {
+  outline: 3px solid rgba(255, 255, 255, 0.8);
+  transform: scale(0.98);
+}
+
+.card-actions {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 440px) {
+  .verify-choice-row,
+  .card-actions {
+    grid-template-columns: 1fr;
+  }
+}

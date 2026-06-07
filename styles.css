@@ -59,7 +59,7 @@ h1, h2, h3 {
 .app-logo {
   width: 38vw;
   max-width: 200px; /* Increased slightly, as rectangles usually need more width */
-  aspect-ratio: 16/15; /* Adjust this to match your logo's exact proportions */
+  aspect-ratio: 1920/1324; /* Adjust this to match your logo's exact proportions */
   object-fit: cover;
   border-radius: 8px; /* Small pixel value for rounded corners, or 0 for sharp corners */
   margin: 0 auto 15px;

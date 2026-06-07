@@ -2,7 +2,7 @@
   --bg: #777;
   --panel: #c0c0c0;
   --soft-panel: #f5f5f5;
-  --teal: DimGray;
+  --teal: #008080;
   --student-primary: #234569;
   --text: #2f2f2f;
   --white: #f5f5f5;
@@ -58,13 +58,12 @@ h1, h2, h3 {
 
 .app-logo {
   width: 38vw;
-  max-width: 200px; /* Increased slightly, as rectangles usually need more width */
-  aspect-ratio: 1920/1324; /* Adjust this to match your logo's exact proportions */
+  max-width: 120px;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 8px; /* Small pixel value for rounded corners, or 0 for sharp corners */
+  border-radius: 90%;
   margin: 0 auto 15px;
   display: block;
-  background-color: transparent;
 }
 
 .subtitle, .helper-text, .mini-text {

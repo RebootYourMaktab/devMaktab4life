@@ -56,7 +56,7 @@ h1, h2, h3 {
 .admin-theme h2, .admin-theme h3 { color: var(--teal); }
 .student-theme h1, .student-theme h2, .student-theme h3 { color: var(--student-primary); }
 
-..app-logo {
+.app-logo {
   width: 38vw;
   max-width: 50px; /* Increased slightly, as rectangles usually need more width */
   aspect-ratio: 16 / 9; /* Adjust this to match your logo's exact proportions */

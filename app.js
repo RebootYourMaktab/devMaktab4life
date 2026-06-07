@@ -21,7 +21,6 @@ function initApp() {
   if (parts[0] === "admin" && parts[1]) {
     state.portalType = "admin";
     state.uniqueid = parts[1];
-      setAuthTheme("admin");
     checkAdmin();
     return;
   }
@@ -29,7 +28,6 @@ function initApp() {
   if (parts[0] === "u" && parts[1]) {
     state.portalType = "student";
     state.uniqueid = parts[1];
-  setAuthTheme("student");
     checkStudent();
     return;
   }

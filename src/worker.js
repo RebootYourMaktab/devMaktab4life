@@ -2,6 +2,8 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
+    try {
+
     if (request.method === "OPTIONS") {
       return corsResponse();
     }
@@ -135,6 +137,14 @@ if (url.pathname === "/api/progress/task-detail") {
 
     
     return json({ success: false, error: "Not found" }, 404);
+
+    } catch (err) {
+      return json({
+        success: false,
+        error: "Worker error",
+        detail: err && err.message ? err.message : String(err)
+      }, 500);
+    }
   }
 };
 
@@ -1367,6 +1377,10 @@ async function hashPin(pin, secret) {
 }
 
 async function callAppsScript(env, payload) {
+  if (!env.APPS_SCRIPT_URL) {
+    throw new Error("Missing APPS_SCRIPT_URL environment variable");
+  }
+
   const response = await fetch(env.APPS_SCRIPT_URL, {
     method: "POST",
     headers: {
@@ -1375,7 +1389,30 @@ async function callAppsScript(env, payload) {
     body: JSON.stringify(payload)
   });
 
-  return response.json();
+  const text = await response.text();
+
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch (err) {
+    throw new Error(
+      "Apps Script returned non-JSON response. HTTP " +
+      response.status +
+      ". First 200 chars: " +
+      text.slice(0, 200)
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      "Apps Script HTTP error " +
+      response.status +
+      ": " +
+      JSON.stringify(data).slice(0, 200)
+    );
+  }
+
+  return data;
 }
 
 function json(obj, status = 200) {

@@ -291,6 +291,15 @@ button:active { transform: scale(0.98); }
   color: #222;
 }
 
-.verify-actions {
-  grid-template-columns: 1fr 1fr 1fr;
+.verification-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+@media (max-width: 440px) {
+  .verification-row {
+    grid-template-columns: 1fr 1fr;
+  }
 }

@@ -125,8 +125,6 @@ async function submitLogin() {
 }
 
 function showHome() {
-  // No Staff Dashboard / Student Home screen is used in this Dhor-only app.
-  // After login, both admin and student go straight to Record Dhor.
   openDhorForm();
 }
 
@@ -294,10 +292,10 @@ function renderDhorRecords(records) {
           ${record.comments ? `<strong>Comments:</strong> ${escapeHtml(record.comments)}<br>` : ""}
           <span class="status-pill ${statusClass}">${escapeHtml(statusDisplay)}</span>
         </div>
-        <div class="card-actions verify-actions">
+        <div class="card-actions">
           <button onclick="editRecord('${escapeForAttribute(record.dhorid)}')">Edit</button>
-          ${adminVerify}
         </div>
+        ${adminVerify ? `<div class="verification-row">${adminVerify}</div>` : ""}
       </div>
     `;
   }).join("");
@@ -320,7 +318,7 @@ function verifyDisplay(status) {
 function normaliseVerifyStatus(status) {
   const text = String(status || "Pending").trim();
   if (text === "Verified" || text === "Needs Verified" || text === "Tops") return VERIFY_TOPS;
-  if (text.toLowerCase() === "needs review") return VERIFY_REVIEW;
+  if (["needs review", "needs works"].includes(text.toLowerCase())) return VERIFY_REVIEW;
   if (text.toLowerCase() === "tops alhamdullilah") return VERIFY_TOPS;
   return text || "Pending";
 }

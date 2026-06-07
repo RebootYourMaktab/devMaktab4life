@@ -44,7 +44,7 @@
         <input id="dhor-date" type="date" />
 
         <label id="dhor-username-label" for="dhor-username">Name</label>
-        <input id="dhor-username" type="text" placeholder="Student name" />
+        <input id="dhor-username" type="text" placeholder="Name" />
 
         <label for="dhor-portion">Portion</label>
         <select id="dhor-portion"></select>
@@ -63,11 +63,12 @@
         <label for="dhor-comments">Comments</label>
         <textarea id="dhor-comments" rows="4" placeholder="Notes about fluency, mistakes, or revision..."></textarea>
 
-        <input id="dhor-status" type="hidden" value="Pending" />
-        <label id="dhor-status-label" class="hidden">Verification</label>
-        <div id="dhor-form-verification-row" class="verification-row hidden">
-          <button id="verify-needs-btn" type="button" class="verify-choice" onclick="setFormVerifyStatus('Needs Review')">Needs Works</button>
-          <button id="verify-tops-btn" type="button" class="verify-choice" onclick="setFormVerifyStatus('Tops Alhamdullilah')">Tops Alhamdullilah</button>
+        <div id="admin-verification-box" class="verification-section hidden">
+          <label>Verification</label>
+          <div class="verification-row">
+            <button id="verify-needs-work" type="button" class="verify-choice-btn" onclick="selectVerifyStatus('Needs Review')">Needs Work</button>
+            <button id="verify-tops" type="button" class="verify-choice-btn" onclick="selectVerifyStatus('Verified')">Tops Alhamdulillah</button>
+          </div>
         </div>
 
         <button id="save-dhor-btn" onclick="saveDhorEntry()">Save Dhor Entry</button>
@@ -78,11 +79,11 @@
     <section id="dhor-list-screen" class="screen">
       <div class="nav-header">
         <h2 id="dhor-list-title">Dhor Progress</h2>
-        <button class="small-btn" onclick="goHome()">Back</button>
+        <button class="small-btn" onclick="openDhorForm()">Back</button>
       </div>
 
       <div id="admin-filter-box" class="dashboard-section hidden">
-        <label for="admin-username-filter">Filter by Name</label>
+        <label for="admin-username-filter">Filter by name</label>
         <div class="filter-row">
           <input id="admin-username-filter" type="text" placeholder="Leave blank for all students" />
           <button class="small-btn" onclick="loadDhorRecords()">Filter</button>

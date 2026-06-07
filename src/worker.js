@@ -176,17 +176,16 @@ async function saveDhorProgress(request, env) {
     readingMinutes: Number(body.readingMinutes || 0),
     comments: String(body.comments || "").trim(),
     username: authUser.user.type === "student" ? authUser.user.username : String(body.username || "").trim(),
-    verifyStatus: normaliseVerifyStatus(String(body.verifyStatus || "Pending")),
-    verifyDate: String(body.verifyDate || "").trim()
+    verifyStatus: authUser.user.type === "student" ? String(body.verifyStatus || "Pending") : String(body.verifyStatus || "Pending")
   };
 
-  if (authUser.user.type === "student" && record.verifyStatus === "Tops Alhamdullilah") {
+  if (authUser.user.type === "student" && record.verifyStatus === "Verified") {
     record.verifyStatus = "Pending";
   }
 
   if (!record.date) return json({ success: false, error: "Date is required" }, 400);
   if (!record.portionid) return json({ success: false, error: "Portion is required" }, 400);
-  if (!record.username) return json({ success: false, error: "Name is required" }, 400);
+  if (!record.username) return json({ success: false, error: "Username is required" }, 400);
 
   return json(await callAppsScript(env, { action: "saveDhorProgress", data: record }));
 }
@@ -197,17 +196,9 @@ async function verifyDhorProgress(request, env) {
   const body = await request.json();
   const data = {
     dhorid: String(body.dhorid || "").trim(),
-    verifyStatus: normaliseVerifyStatus(String(body.verifyStatus || "Pending"))
+    verifyStatus: String(body.verifyStatus || "Pending").trim()
   };
   return json(await callAppsScript(env, { action: "setDhorVerifyStatus", data }));
-}
-
-function normaliseVerifyStatus(status) {
-  const text = String(status || "Pending").trim();
-  const lower = text.toLowerCase();
-  if (text === "Verified" || text === "Needs Verified" || text === "Tops" || lower === "tops alhamdullilah") return "Tops Alhamdullilah";
-  if (lower === "needs review" || lower === "needs works" || lower === "needs work") return "Needs Review";
-  return text || "Pending";
 }
 
 async function requireAuth(request, env) {

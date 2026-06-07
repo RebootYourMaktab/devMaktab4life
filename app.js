@@ -37,17 +37,6 @@ function initApp() {
     "Please open your personal login link.";
 }
 
-function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(screen => {
-    screen.classList.remove("active");
-  });
-
-  const target = document.getElementById(id);
-
-  if (target) {
-    target.classList.add("active");
-  }
-}
 
 function setError(message) {
   document.getElementById("auth-error").innerText = message || "";

@@ -31,17 +31,38 @@
       <p id="auth-error" class="error-message"></p>
     </section>
 
-    <section id="dhor-form-screen" class="screen">
-      <div class="nav-header">
+    <section id="student-home" class="screen student-theme">
+      <div class="top-bar">
         <div>
-          <h2 id="dhor-form-title">Record Dhor</h2>
-          <p class="mini-text">Student prefilled as HIFDH1. New entries copy the last saved entry for that student.</p>
+          <h2>Student Home</h2>
+          <p id="student-welcome" class="mini-text"></p>
         </div>
         <button class="small-btn" onclick="logout()">Logout</button>
       </div>
+      <div class="card-grid">
+        <button class="home-card" onclick="openDhorForm()"><span class="card-icon">＋</span><span>Record Dhor</span></button>
+        <button class="home-card" onclick="openDhorList()"><span class="card-icon">▤</span><span>My Dhor Progress</span></button>
+      </div>
+    </section>
 
-      <div class="screen-actions">
-        <button class="small-btn" onclick="openDhorList()">View Dhor Progress</button>
+    <section id="admin-home" class="screen admin-theme">
+      <div class="top-bar">
+        <div>
+          <h2>Staff Dashboard</h2>
+          <p id="admin-welcome" class="mini-text"></p>
+        </div>
+        <button class="small-btn" onclick="logout()">Logout</button>
+      </div>
+      <div class="card-grid">
+        <button class="home-card" onclick="openDhorList()"><span class="card-icon">▧</span><span>Dhor Progress</span></button>
+        <button class="home-card" onclick="openDhorForm()"><span class="card-icon">＋</span><span>Add Dhor Entry</span></button>
+      </div>
+    </section>
+
+    <section id="dhor-form-screen" class="screen">
+      <div class="nav-header">
+        <h2 id="dhor-form-title">Record Dhor</h2>
+        <button class="small-btn" onclick="goHome()">Back</button>
       </div>
 
       <div class="dashboard-section form-panel">
@@ -50,8 +71,8 @@
         <label for="dhor-date">Date</label>
         <input id="dhor-date" type="date" />
 
-        <label id="dhor-name-label" for="dhor-name">Name</label>
-        <input id="dhor-name" type="text" placeholder="Name" />
+        <label id="dhor-username-label" for="dhor-username">Student Username</label>
+        <input id="dhor-username" type="text" placeholder="Student username" />
 
         <label for="dhor-portion">Portion</label>
         <select id="dhor-portion"></select>
@@ -70,14 +91,12 @@
         <label for="dhor-comments">Comments</label>
         <textarea id="dhor-comments" rows="4" placeholder="Notes about fluency, mistakes, or revision..."></textarea>
 
-        <div id="dhor-status-admin-box">
-          <label for="dhor-status">Verify Status</label>
-          <input id="dhor-status" type="hidden" value="Pending" />
-          <div class="verify-choice-row">
-            <button type="button" class="verify-choice-btn" data-status="Verified" onclick="setFormVerifyStatus('Verified')">👍<br><span>Needs Verified</span></button>
-            <button type="button" class="verify-choice-btn" data-status="Needs Review" onclick="setFormVerifyStatus('Needs Review')">👎<br><span>Needs Review</span></button>
-          </div>
-        </div>
+        <label id="dhor-status-label" for="dhor-status">Verify Status</label>
+        <select id="dhor-status">
+          <option value="Pending">Pending</option>
+          <option value="Verified">Verified</option>
+          <option value="Needs Review">Needs Review</option>
+        </select>
 
         <button id="save-dhor-btn" onclick="saveDhorEntry()">Save Dhor Entry</button>
         <p id="dhor-form-message" class="helper-text"></p>
@@ -87,13 +106,13 @@
     <section id="dhor-list-screen" class="screen">
       <div class="nav-header">
         <h2 id="dhor-list-title">Dhor Progress</h2>
-        <button class="small-btn" onclick="openDhorForm()">Record Dhor</button>
+        <button class="small-btn" onclick="goHome()">Back</button>
       </div>
 
       <div id="admin-filter-box" class="dashboard-section hidden">
-        <label for="admin-name-filter">Filter by Name</label>
+        <label for="admin-username-filter">Filter by username</label>
         <div class="filter-row">
-          <input id="admin-name-filter" type="text" placeholder="Leave blank for all students" />
+          <input id="admin-username-filter" type="text" placeholder="Leave blank for all students" />
           <button class="small-btn" onclick="loadDhorRecords()">Filter</button>
         </div>
       </div>

@@ -1,10 +1,10 @@
 :root {
-  --bg: #777;
-  --panel: #c0c0c0;
+  --bg: lightgrey 
+  --panel: darkgrey
   --soft-panel: #f5f5f5;
-  --teal: #008080;
-  --student-primary: #234569;
-  --text: #2f2f2f;
+  --teal: #FCFBFC;
+  --student-primary: white;
+  --text: white;
   --white: #f5f5f5;
   --shadow: rgba(0, 0, 0, 0.25);
 }

@@ -176,7 +176,8 @@ async function saveDhorProgress(request, env) {
     readingMinutes: Number(body.readingMinutes || 0),
     comments: String(body.comments || "").trim(),
     username: authUser.user.type === "student" ? authUser.user.username : String(body.username || "").trim(),
-    verifyStatus: normaliseVerifyStatus(String(body.verifyStatus || "Pending"))
+    verifyStatus: normaliseVerifyStatus(String(body.verifyStatus || "Pending")),
+    verifyDate: String(body.verifyDate || "").trim()
   };
 
   if (authUser.user.type === "student" && record.verifyStatus === "Tops Alhamdullilah") {
@@ -205,7 +206,7 @@ function normaliseVerifyStatus(status) {
   const text = String(status || "Pending").trim();
   const lower = text.toLowerCase();
   if (text === "Verified" || text === "Needs Verified" || text === "Tops" || lower === "tops alhamdullilah") return "Tops Alhamdullilah";
-  if (lower === "needs review" || lower === "needs works") return "Needs Review";
+  if (lower === "needs review" || lower === "needs works" || lower === "needs work") return "Needs Review";
   return text || "Pending";
 }
 

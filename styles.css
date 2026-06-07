@@ -275,6 +275,7 @@ button:active { transform: scale(0.98); }
   color: #ffffff;
   background: var(--teal);
   font-size: 0.9rem;
+  min-height: 58px;
 }
 
 .verify-choice.is-selected {
@@ -302,4 +303,14 @@ button:active { transform: scale(0.98); }
   .verification-row {
     grid-template-columns: 1fr 1fr;
   }
+}
+
+.prefilled-last {
+  background: #e6e6e6;
+  color: #777;
+}
+
+input[readonly] {
+  background: #eeeeee;
+  color: #555;
 }

@@ -11,6 +11,8 @@ const state = {
 
 const VERIFY_TOPS = "Tops Alhamdullilah";
 const VERIFY_REVIEW = "Needs Review";
+const DEFAULT_STUDENT_ID = "HIFDH1";
+const DEFAULT_STUDENT_NAME = "Umme";
 
 window.addEventListener("load", initApp);
 
@@ -121,15 +123,16 @@ async function submitLogin() {
   localStorage.setItem("dhor_token", state.token);
   localStorage.setItem("dhor_portal_type", state.portalType);
   await loadPortions();
-  showHome();
+  await showHome();
 }
 
-function showHome() {
-  openDhorForm();
+async function showHome() {
+  const lastRecord = await getLastDhorRecordForForm();
+  openDhorForm(lastRecord, { fromLastRecord: !!lastRecord });
 }
 
-function goHome() {
-  openDhorForm();
+async function goHome() {
+  await showHome();
 }
 
 function logout() {
@@ -158,42 +161,104 @@ function populatePortionSelect() {
   }).join("");
 }
 
-function openDhorForm(record = null) {
+function getDisplayName() {
+  if (state.portalType === "student") return state.user?.username || DEFAULT_STUDENT_NAME;
+  return DEFAULT_STUDENT_NAME;
+}
+
+async function getLastDhorRecordForForm() {
+  try {
+    const result = await apiPost("/api/dhor/list", {}, state.token);
+    if (!result.success) return null;
+    const records = result.records || [];
+    state.records = records;
+
+    if (state.portalType === "admin") {
+      return records.find(r => sameStudent(r.username, DEFAULT_STUDENT_NAME))
+        || records.find(r => sameStudent(r.username, DEFAULT_STUDENT_ID))
+        || null;
+    }
+
+    const displayName = getDisplayName();
+    return records.find(r => sameStudent(r.username, displayName)) || records[0] || null;
+  } catch (err) {
+    return null;
+  }
+}
+
+function sameStudent(a, b) {
+  return String(a || "").trim().toLowerCase() === String(b || "").trim().toLowerCase();
+}
+
+function openDhorForm(record = null, options = {}) {
+  const fromLastRecord = options.fromLastRecord === true;
   document.getElementById("dhor-form-screen").classList.toggle("student-theme", state.portalType === "student");
   document.getElementById("dhor-form-screen").classList.toggle("admin-theme", state.portalType === "admin");
-  document.getElementById("dhor-form-title").innerText = record ? "Edit Dhor Entry" : "Record Dhor";
+  document.getElementById("dhor-form-title").innerText = fromLastRecord ? "Record Dhor" : (record ? "Edit Dhor Entry" : "Record Dhor");
   document.getElementById("dhor-form-message").innerText = "";
 
-  document.getElementById("dhor-id").value = record ? record.dhorid : "";
-  document.getElementById("dhor-date").value = record ? record.date : todayString();
+  document.getElementById("dhor-id").value = fromLastRecord ? "" : (record ? record.dhorid : "");
+  document.getElementById("dhor-date").value = fromLastRecord ? todayString() : (record ? record.date : todayString());
   document.getElementById("dhor-portion").value = record ? record.portionid : "";
   document.getElementById("dhor-mistakes").value = record ? record.mistakesNumber : "";
   document.getElementById("dhor-minutes").value = record ? record.readingMinutes : "";
   document.getElementById("dhor-comments").value = record ? record.comments : "";
-  document.getElementById("dhor-status").value = normaliseVerifyStatus(record ? record.verifyStatus : "Pending");
+
+  const startStatus = fromLastRecord ? "Pending" : normaliseVerifyStatus(record ? record.verifyStatus : "Pending");
+  setFormVerifyStatus(startStatus);
 
   const usernameInput = document.getElementById("dhor-username");
   const usernameLabel = document.getElementById("dhor-username-label");
   const statusLabel = document.getElementById("dhor-status-label");
-  const statusSelect = document.getElementById("dhor-status");
+  const verificationRow = document.getElementById("dhor-form-verification-row");
 
-  if (state.portalType === "student") {
-    usernameInput.value = state.user.username;
-    usernameInput.classList.add("hidden");
-    usernameLabel.classList.add("hidden");
-    statusSelect.classList.add("hidden");
-    statusLabel.classList.add("hidden");
-  } else {
-    usernameInput.value = record ? record.username : (usernameInput.value || "HIFDH1");
-    usernameInput.classList.remove("hidden");
-    usernameLabel.innerText = "Name";
-    usernameInput.placeholder = "Student name";
-    usernameLabel.classList.remove("hidden");
-    statusSelect.classList.remove("hidden");
+  usernameInput.value = record && !fromLastRecord ? displayNameFromRecord(record.username) : getDisplayName();
+  usernameInput.classList.remove("hidden");
+  usernameLabel.classList.remove("hidden");
+  usernameLabel.innerText = "Name";
+  usernameInput.placeholder = "Student name";
+  usernameInput.readOnly = state.portalType === "student";
+
+  if (state.portalType === "admin") {
+    verificationRow.classList.remove("hidden");
     statusLabel.classList.remove("hidden");
+  } else {
+    verificationRow.classList.add("hidden");
+    statusLabel.classList.add("hidden");
   }
 
+  markLastPortionFields(fromLastRecord);
   showScreen("dhor-form-screen");
+}
+
+function displayNameFromRecord(name) {
+  return sameStudent(name, DEFAULT_STUDENT_ID) ? DEFAULT_STUDENT_NAME : (name || DEFAULT_STUDENT_NAME);
+}
+
+function markLastPortionFields(isPrefilled) {
+  ["dhor-portion", "dhor-mistakes", "dhor-minutes", "dhor-comments"].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle("prefilled-last", isPrefilled);
+  });
+}
+
+function setFormVerifyStatus(status) {
+  const normalised = normaliseVerifyStatus(status);
+  const hidden = document.getElementById("dhor-status");
+  if (hidden) hidden.value = normalised;
+
+  const reviewBtn = document.getElementById("verify-needs-btn");
+  const topsBtn = document.getElementById("verify-tops-btn");
+  if (!reviewBtn || !topsBtn) return;
+
+  const reviewSelected = normalised === VERIFY_REVIEW;
+  const topsSelected = normalised === VERIFY_TOPS;
+
+  reviewBtn.classList.toggle("is-selected", reviewSelected);
+  topsBtn.classList.toggle("is-selected", topsSelected);
+  reviewBtn.innerText = reviewSelected ? "👎" : "Needs Works";
+  topsBtn.innerText = topsSelected ? "👍" : VERIFY_TOPS;
 }
 
 async function saveDhorEntry() {
@@ -202,13 +267,14 @@ async function saveDhorEntry() {
   const record = {
     dhorid: document.getElementById("dhor-id").value.trim(),
     date: document.getElementById("dhor-date").value,
-    username: document.getElementById("dhor-username").value.trim(),
+    username: displayNameFromRecord(document.getElementById("dhor-username").value.trim()),
     portionid: portionSelect.value,
     quarterjuzname: option ? option.dataset.name || option.textContent : "",
     mistakesNumber: Number(document.getElementById("dhor-mistakes").value || 0),
     readingMinutes: Number(document.getElementById("dhor-minutes").value || 0),
     comments: document.getElementById("dhor-comments").value.trim(),
-    verifyStatus: document.getElementById("dhor-status").value || "Pending"
+    verifyStatus: document.getElementById("dhor-status").value || "Pending",
+    verifyDate: normaliseVerifyStatus(document.getElementById("dhor-status").value) === "Pending" ? "" : todayString()
   };
 
   if (!record.date) return showFormMessage("Please select a date.");
@@ -318,7 +384,7 @@ function verifyDisplay(status) {
 function normaliseVerifyStatus(status) {
   const text = String(status || "Pending").trim();
   if (text === "Verified" || text === "Needs Verified" || text === "Tops") return VERIFY_TOPS;
-  if (["needs review", "needs works"].includes(text.toLowerCase())) return VERIFY_REVIEW;
+  if (["needs review", "needs works", "needs work"].includes(text.toLowerCase())) return VERIFY_REVIEW;
   if (text.toLowerCase() === "tops alhamdullilah") return VERIFY_TOPS;
   return text || "Pending";
 }

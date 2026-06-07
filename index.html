@@ -63,12 +63,12 @@
         <label for="dhor-comments">Comments</label>
         <textarea id="dhor-comments" rows="4" placeholder="Notes about fluency, mistakes, or revision..."></textarea>
 
-        <label id="dhor-status-label" for="dhor-status">Verify Status</label>
-        <select id="dhor-status">
-          <option value="Pending">Pending</option>
-          <option value="Tops Alhamdullilah">Tops Alhamdullilah</option>
-          <option value="Needs Review">Needs Review</option>
-        </select>
+        <input id="dhor-status" type="hidden" value="Pending" />
+        <label id="dhor-status-label" class="hidden">Verification</label>
+        <div id="dhor-form-verification-row" class="verification-row hidden">
+          <button id="verify-needs-btn" type="button" class="verify-choice" onclick="setFormVerifyStatus('Needs Review')">Needs Works</button>
+          <button id="verify-tops-btn" type="button" class="verify-choice" onclick="setFormVerifyStatus('Tops Alhamdullilah')">Tops Alhamdullilah</button>
+        </div>
 
         <button id="save-dhor-btn" onclick="saveDhorEntry()">Save Dhor Entry</button>
         <p id="dhor-form-message" class="helper-text"></p>

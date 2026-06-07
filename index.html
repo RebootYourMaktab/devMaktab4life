@@ -31,34 +31,6 @@
       <p id="auth-error" class="error-message"></p>
     </section>
 
-    <section id="student-home" class="screen student-theme">
-      <div class="top-bar">
-        <div>
-          <h2>Student Home</h2>
-          <p id="student-welcome" class="mini-text"></p>
-        </div>
-        <button class="small-btn" onclick="logout()">Logout</button>
-      </div>
-      <div class="card-grid">
-        <button class="home-card" onclick="openDhorForm()"><span class="card-icon">＋</span><span>Record Dhor</span></button>
-        <button class="home-card" onclick="openDhorList()"><span class="card-icon">▤</span><span>My Dhor Progress</span></button>
-      </div>
-    </section>
-
-    <section id="admin-home" class="screen admin-theme">
-      <div class="top-bar">
-        <div>
-          <h2>Staff Dashboard</h2>
-          <p id="admin-welcome" class="mini-text"></p>
-        </div>
-        <button class="small-btn" onclick="logout()">Logout</button>
-      </div>
-      <div class="card-grid">
-        <button class="home-card" onclick="openDhorList()"><span class="card-icon">▧</span><span>Dhor Progress</span></button>
-        <button class="home-card" onclick="openDhorForm()"><span class="card-icon">＋</span><span>Add Dhor Entry</span></button>
-      </div>
-    </section>
-
     <section id="dhor-form-screen" class="screen">
       <div class="nav-header">
         <h2 id="dhor-form-title">Record Dhor</h2>
@@ -71,8 +43,8 @@
         <label for="dhor-date">Date</label>
         <input id="dhor-date" type="date" />
 
-        <label id="dhor-username-label" for="dhor-username">Student Username</label>
-        <input id="dhor-username" type="text" placeholder="Student username" />
+        <label id="dhor-username-label" for="dhor-username">Name</label>
+        <input id="dhor-username" type="text" placeholder="Student name" />
 
         <label for="dhor-portion">Portion</label>
         <select id="dhor-portion"></select>
@@ -94,7 +66,7 @@
         <label id="dhor-status-label" for="dhor-status">Verify Status</label>
         <select id="dhor-status">
           <option value="Pending">Pending</option>
-          <option value="Verified">Verified</option>
+          <option value="Tops Alhamdullilah">Tops Alhamdullilah</option>
           <option value="Needs Review">Needs Review</option>
         </select>
 
@@ -110,7 +82,7 @@
       </div>
 
       <div id="admin-filter-box" class="dashboard-section hidden">
-        <label for="admin-username-filter">Filter by username</label>
+        <label for="admin-username-filter">Filter by Name</label>
         <div class="filter-row">
           <input id="admin-username-filter" type="text" placeholder="Leave blank for all students" />
           <button class="small-btn" onclick="loadDhorRecords()">Filter</button>

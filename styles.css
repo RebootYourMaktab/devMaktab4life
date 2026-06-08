@@ -67,7 +67,7 @@ h1, h2, h3 {
 .app-logo {
   width: 38vw;
   max-width: 200px;
-  aspect-ratio: 1920 / 1324;
+  aspect-ratio: 1 / 1
   object-fit: cover;
   border-radius: 8px;
   margin: 0 auto 15px;

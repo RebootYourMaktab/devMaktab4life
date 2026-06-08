@@ -1,17 +1,12 @@
 const API_BASE = "https://ummedhorworker.naidu-hajira.workers.dev";
 
-const CACHE_VERSION = "v1";
-const DEFAULT_ADMIN_STUDENT_USERNAME = "HIFDH1";
-
 const state = {
   portalType: null,
   uniqueid: null,
   token: localStorage.getItem("dhor_token") || "",
   user: null,
   portions: [],
-  records: [],
-  pendingPortionId: "",
-  currentCachedRecord: null
+  records: []
 };
 
 window.addEventListener("load", initApp);
@@ -92,7 +87,7 @@ async function checkAdmin() {
     const result = await apiPost("/api/admin/check-admin", { uniqueid: state.uniqueid });
     if (!result.success) return setError(result.error || "Invalid admin link");
     state.user = result.admin;
-    document.getElementById("portal-title").innerText = "ADMIN";
+    document.getElementById("portal-title").innerText = "Staff Portal";
     document.getElementById("portal-subtitle").innerText = `${result.admin.username} · ${result.admin.role}`;
     document.getElementById(result.admin.pinsetup ? "login-pin-box" : "setup-pin-box").classList.remove("hidden");
   } catch (err) {
@@ -122,18 +117,18 @@ async function submitLogin() {
   state.user = state.portalType === "admin" ? result.admin : result.student;
   localStorage.setItem("dhor_token", state.token);
   localStorage.setItem("dhor_portal_type", state.portalType);
-
-  // Speed improvement:
-  // 1. Show the Dhor form immediately.
-  // 2. Fill from local cache immediately.
-  // 3. Refresh Google Sheet data quietly in the background.
-  primeFromCache();
+  await loadPortions();
   showHome();
-  refreshDhorDataInBackground();
 }
 
 function showHome() {
-  openDhorForm();
+  if (state.portalType === "admin") {
+    document.getElementById("admin-welcome").innerText = `${state.user.username} · ${state.user.role || "ADMIN"}`;
+    showScreen("admin-home");
+  } else {
+    document.getElementById("student-welcome").innerText = `${state.user.username}${state.user.classgroup ? " · Group " + state.user.classgroup : ""}`;
+    showScreen("student-home");
+  }
 }
 
 function goHome() {
@@ -148,157 +143,37 @@ function logout() {
   location.reload();
 }
 
-function cachePrefix() {
-  const portal = state.portalType || "unknown";
-  const userKey = state.uniqueid || (state.user && state.user.username) || "unknown";
-  return `umme_dhor_${CACHE_VERSION}_${portal}_${userKey}`;
-}
-
-function cacheKey(name) {
-  return `${cachePrefix()}_${name}`;
-}
-
-function getCache(name, fallback = null) {
-  try {
-    const raw = localStorage.getItem(cacheKey(name));
-    return raw ? JSON.parse(raw) : fallback;
-  } catch (err) {
-    return fallback;
-  }
-}
-
-function setCache(name, value) {
-  try {
-    localStorage.setItem(cacheKey(name), JSON.stringify({
-      savedAt: new Date().toISOString(),
-      value
-    }));
-  } catch (err) {
-    // If storage is full or blocked, the app still works online.
-  }
-}
-
-function readCachedValue(name, fallback = null) {
-  const cached = getCache(name, null);
-  return cached && Object.prototype.hasOwnProperty.call(cached, "value")
-    ? cached.value
-    : fallback;
-}
-
-function primeFromCache() {
-  const cachedPortions = readCachedValue("portions", []);
-  if (Array.isArray(cachedPortions) && cachedPortions.length) {
-    state.portions = cachedPortions;
-    populatePortionSelect();
-  }
-
-  const cachedLatest = readCachedValue("latest_record", null);
-  if (cachedLatest) {
-    state.currentCachedRecord = cachedLatest;
-  }
-}
-
-function setSyncStatus(message) {
-  const target = document.getElementById("dhor-sync-status") || document.getElementById("dhor-form-message");
-  if (target) target.innerText = message || "";
-}
-
-async function refreshDhorDataInBackground() {
-  setSyncStatus("Loading latest saved record...");
-  await Promise.allSettled([
-    loadPortions({ silent: true }),
-    loadLatestRecord({ silent: true })
-  ]);
-
-  if (isDhorFormActive()) {
-    const latest = state.currentCachedRecord;
-    if (latest) applyRecordToForm(latest, true);
-    setSyncStatus("Latest record loaded.");
-  }
-}
-
-function isDhorFormActive() {
-  const form = document.getElementById("dhor-form-screen");
-  return form && form.classList.contains("active");
-}
-
-async function loadPortions(options = {}) {
+async function loadPortions() {
   const result = await apiPost("/api/dhor/portions", {}, state.token);
   if (!result.success) {
-    if (!options.silent) alert(result.error || "Could not load portions.");
+    alert(result.error || "Could not load portions.");
     return;
   }
   state.portions = result.portions || [];
-  setCache("portions", state.portions);
   populatePortionSelect();
 }
 
 function populatePortionSelect() {
   const select = document.getElementById("dhor-portion");
-  if (!select) return;
-
   select.innerHTML = `<option value="">Select portion...</option>` + state.portions.map(p => {
-    const juz = p.juzno ? `${p.juzno} · ` : "";
-    const label = `${juz}${p.quarterjuzname || ""}`;
+    const label = `${p.quarterjuzname}${p.juzno ? " · " + p.juzno : ""}`;
     return `<option value="${escapeHtml(p.portionid)}" data-name="${escapeHtml(p.quarterjuzname)}">${escapeHtml(label)}</option>`;
   }).join("");
-
-  if (state.pendingPortionId) {
-    select.value = state.pendingPortionId;
-  }
-}
-
-function getActiveRecordUsername() {
-  if (state.portalType === "student") return state.user && state.user.username ? state.user.username : "";
-  const field = document.getElementById("dhor-username");
-  return field && field.value.trim() ? field.value.trim() : DEFAULT_ADMIN_STUDENT_USERNAME;
-}
-
-async function loadLatestRecord(options = {}) {
-  const body = state.portalType === "admin"
-    ? { username: getActiveRecordUsername() }
-    : {};
-
-  const result = await apiPost("/api/dhor/list", body, state.token);
-  if (!result.success) {
-    if (!options.silent) showFormMessage(result.error || "Could not load latest record.");
-    return;
-  }
-
-  const records = result.records || [];
-  state.records = records;
-  const latest = getNewestRecord(records);
-  if (latest) {
-    state.currentCachedRecord = latest;
-    setCache("latest_record", latest);
-  }
-}
-
-function getNewestRecord(records) {
-  if (!Array.isArray(records) || !records.length) return null;
-  return [...records].sort((a, b) => {
-    const dateA = Date.parse(a.date || "") || 0;
-    const dateB = Date.parse(b.date || "") || 0;
-    if (dateA !== dateB) return dateB - dateA;
-    return String(b.dhorid || "").localeCompare(String(a.dhorid || ""), undefined, { numeric: true });
-  })[0];
 }
 
 function openDhorForm(record = null) {
-  const formScreen = document.getElementById("dhor-form-screen");
-  formScreen.classList.toggle("student-theme", state.portalType === "student");
-  formScreen.classList.toggle("admin-theme", state.portalType === "admin");
-  document.getElementById("dhor-form-title").innerText = "Record Dhor";
+  document.getElementById("dhor-form-screen").classList.toggle("student-theme", state.portalType === "student");
+  document.getElementById("dhor-form-screen").classList.toggle("admin-theme", state.portalType === "admin");
+  document.getElementById("dhor-form-title").innerText = record ? "Edit Dhor Entry" : "Record Dhor";
   document.getElementById("dhor-form-message").innerText = "";
 
-  const cached = !record ? state.currentCachedRecord : null;
-  const recordToUse = record || cached || null;
-
-  document.getElementById("dhor-id").value = ""; // Every save creates a new row.
-  document.getElementById("dhor-date").value = recordToUse && recordToUse.date ? recordToUse.date : todayString();
-  document.getElementById("dhor-mistakes").value = recordToUse ? recordToUse.mistakesNumber || "" : "";
-  document.getElementById("dhor-minutes").value = recordToUse ? recordToUse.readingMinutes || "" : "";
-  document.getElementById("dhor-comments").value = recordToUse ? recordToUse.comments || "" : "";
+  document.getElementById("dhor-id").value = record ? record.dhorid : "";
+  document.getElementById("dhor-date").value = record ? record.date : todayString();
+  document.getElementById("dhor-portion").value = record ? record.portionid : "";
+  document.getElementById("dhor-mistakes").value = record ? record.mistakesNumber : "";
+  document.getElementById("dhor-minutes").value = record ? record.readingMinutes : "";
+  document.getElementById("dhor-comments").value = record ? record.comments : "";
+  document.getElementById("dhor-status").value = record ? record.verifyStatus : "Pending";
 
   const usernameInput = document.getElementById("dhor-username");
   const usernameLabel = document.getElementById("dhor-username-label");
@@ -312,54 +187,21 @@ function openDhorForm(record = null) {
     statusSelect.classList.add("hidden");
     statusLabel.classList.add("hidden");
   } else {
-    usernameInput.value = recordToUse && recordToUse.username ? recordToUse.username : DEFAULT_ADMIN_STUDENT_USERNAME;
+    usernameInput.value = record ? record.username : "";
     usernameInput.classList.remove("hidden");
     usernameLabel.classList.remove("hidden");
     statusSelect.classList.remove("hidden");
     statusLabel.classList.remove("hidden");
   }
 
-  const statusValue = recordToUse && recordToUse.verifyStatus ? recordToUse.verifyStatus : "Pending";
-  statusSelect.value = statusValue;
-
-  const portionId = recordToUse && recordToUse.portionid ? recordToUse.portionid : "";
-  state.pendingPortionId = portionId;
-  const portionSelect = document.getElementById("dhor-portion");
-  if (portionSelect) portionSelect.value = portionId;
-
-  markPrefilledFields(Boolean(cached && !record));
   showScreen("dhor-form-screen");
-
-  if (!state.portions.length) {
-    setSyncStatus(cached ? "Showing saved copy while refreshing..." : "Loading portions...");
-  }
-}
-
-function applyRecordToForm(record, fromBackgroundRefresh = false) {
-  if (!record) return;
-  state.currentCachedRecord = record;
-  state.pendingPortionId = record.portionid || "";
-  document.getElementById("dhor-date").value = record.date || todayString();
-  document.getElementById("dhor-mistakes").value = record.mistakesNumber || "";
-  document.getElementById("dhor-minutes").value = record.readingMinutes || "";
-  document.getElementById("dhor-comments").value = record.comments || "";
-  document.getElementById("dhor-portion").value = record.portionid || "";
-  if (state.portalType === "admin") document.getElementById("dhor-username").value = record.username || DEFAULT_ADMIN_STUDENT_USERNAME;
-  markPrefilledFields(fromBackgroundRefresh);
-}
-
-function markPrefilledFields(isPrefilled) {
-  ["dhor-date", "dhor-portion", "dhor-mistakes", "dhor-minutes", "dhor-comments"].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.classList.toggle("prefilled-field", isPrefilled);
-  });
 }
 
 async function saveDhorEntry() {
   const portionSelect = document.getElementById("dhor-portion");
   const option = portionSelect.options[portionSelect.selectedIndex];
   const record = {
-    dhorid: "", // Backend assigns the next sequential DhorID.
+    dhorid: document.getElementById("dhor-id").value.trim(),
     date: document.getElementById("dhor-date").value,
     username: document.getElementById("dhor-username").value.trim(),
     portionid: portionSelect.value,
@@ -382,17 +224,8 @@ async function saveDhorEntry() {
   button.innerText = "Save Dhor Entry";
 
   if (!result.success) return showFormMessage(result.error || "Could not save entry.");
-
-  const savedRecord = {
-    ...record,
-    dhorid: result.dhorid || record.dhorid,
-    verifyStatus: record.verifyStatus || "Pending"
-  };
-  state.currentCachedRecord = savedRecord;
-  setCache("latest_record", savedRecord);
-  markPrefilledFields(false);
-  showFormMessage("Saved successfully. You can save this again or update it.");
-  setSyncStatus("Saved online.");
+  showFormMessage("Saved successfully.");
+  await openDhorList();
 }
 
 function showFormMessage(message) {
@@ -403,8 +236,7 @@ async function openDhorList() {
   document.getElementById("dhor-list-screen").classList.toggle("student-theme", state.portalType === "student");
   document.getElementById("dhor-list-screen").classList.toggle("admin-theme", state.portalType === "admin");
   document.getElementById("dhor-list-title").innerText = state.portalType === "admin" ? "Dhor Progress" : "My Dhor Progress";
-  const adminFilter = document.getElementById("admin-filter-box");
-  if (adminFilter) adminFilter.classList.toggle("hidden", state.portalType !== "admin");
+  document.getElementById("admin-filter-box").classList.toggle("hidden", state.portalType !== "admin");
   showScreen("dhor-list-screen");
   await loadDhorRecords();
 }
@@ -412,9 +244,8 @@ async function openDhorList() {
 async function loadDhorRecords() {
   const container = document.getElementById("dhor-record-list");
   container.innerHTML = `<p class="helper-text">Loading records...</p>`;
-  const filter = document.getElementById("admin-username-filter");
   const body = state.portalType === "admin"
-    ? { username: filter ? filter.value.trim() : "" }
+    ? { username: document.getElementById("admin-username-filter").value.trim() }
     : {};
   const result = await apiPost("/api/dhor/list", body, state.token);
   if (!result.success) {
@@ -422,11 +253,6 @@ async function loadDhorRecords() {
     return;
   }
   state.records = result.records || [];
-  const latest = getNewestRecord(state.records);
-  if (latest) {
-    state.currentCachedRecord = latest;
-    setCache("latest_record", latest);
-  }
   renderSummary(state.records);
   renderDhorRecords(state.records);
 }
@@ -466,7 +292,7 @@ function renderDhorRecords(records) {
           <span class="status-pill ${statusClass}">${escapeHtml(record.verifyStatus || "Pending")}</span>
         </div>
         <div class="card-actions">
-          <button onclick="editRecord('${escapeForAttribute(record.dhorid)}')">Load</button>
+          <button onclick="editRecord('${escapeForAttribute(record.dhorid)}')">Edit</button>
           ${adminVerify}
         </div>
       </div>

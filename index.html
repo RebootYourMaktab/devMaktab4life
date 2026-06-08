@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Umme Hifdh Record</title>
+  <title>Umme Dhor</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link href="https://fonts.cdnfonts.com/css/gagalin" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css" />
@@ -10,8 +10,8 @@
 <body>
   <main class="app-shell">
     <section id="auth-screen" class="screen active">
-      <img src="/logo.png" alt="Umme Hifdh Logo" class="app-logo" />
-      <h1 id="portal-title">Umme Hifdh Record</h1>
+      <img src="/logo.png" alt="Umme Dhor Logo" class="app-logo" />
+      <h1 id="portal-title">Umme Dhor</h1>
       <p id="portal-subtitle" class="subtitle">Loading portal...</p>
 
       <div id="setup-pin-box" class="auth-box hidden">
@@ -31,22 +31,48 @@
       <p id="auth-error" class="error-message"></p>
     </section>
 
+    <section id="student-home" class="screen student-theme">
+      <div class="top-bar">
+        <div>
+          <h2>Student Home</h2>
+          <p id="student-welcome" class="mini-text"></p>
+        </div>
+        <button class="small-btn" onclick="logout()">Logout</button>
+      </div>
+      <div class="card-grid">
+        <button class="home-card" onclick="openDhorForm()"><span class="card-icon">＋</span><span>Record Dhor</span></button>
+        <button class="home-card" onclick="openDhorList()"><span class="card-icon">▤</span><span>My Dhor Progress</span></button>
+      </div>
+    </section>
+
+    <section id="admin-home" class="screen admin-theme">
+      <div class="top-bar">
+        <div>
+          <h2>Staff Dashboard</h2>
+          <p id="admin-welcome" class="mini-text"></p>
+        </div>
+        <button class="small-btn" onclick="logout()">Logout</button>
+      </div>
+      <div class="card-grid">
+        <button class="home-card" onclick="openDhorList()"><span class="card-icon">▧</span><span>Dhor Progress</span></button>
+        <button class="home-card" onclick="openDhorForm()"><span class="card-icon">＋</span><span>Add Dhor Entry</span></button>
+      </div>
+    </section>
+
     <section id="dhor-form-screen" class="screen">
       <div class="nav-header">
-        <h2 id="dhor-form-title">Umme Hifdh Record</h2>
+        <h2 id="dhor-form-title">Record Dhor</h2>
         <button class="small-btn" onclick="logout()">Logout</button>
       </div>
 
-      <div class="dashboard-section form-panel" id="dhor-form-panel">
-        <input id="dhor-studentid" type="hidden" />
-        <input id="dhor-username-hidden" type="hidden" />
-        <input id="dhor-verify-status" type="hidden" value="Pending" />
+      <div class="dashboard-section form-panel">
+        <input id="dhor-id" type="hidden" />
 
         <label for="dhor-date">Date</label>
         <input id="dhor-date" type="date" />
 
-        <label for="dhor-display-name">Name</label>
-        <input id="dhor-display-name" type="text" readonly />
+        <label id="dhor-username-label" for="dhor-username">Student Username</label>
+        <input id="dhor-username" type="text" placeholder="Student username" />
 
         <label for="dhor-portion">Portion</label>
         <select id="dhor-portion"></select>
@@ -63,17 +89,17 @@
         </div>
 
         <label for="dhor-comments">Comments</label>
-        <textarea id="dhor-comments" rows="3" placeholder="Notes about fluency, mistakes, or revision..."></textarea>
+        <textarea id="dhor-comments" rows="4" placeholder="Notes about fluency, mistakes, or revision..."></textarea>
 
-        <div id="admin-verification-box" class="verification-box hidden">
-          <label>Verification</label>
-          <div class="verification-row">
-            <button type="button" id="verify-needs-work" class="verify-choice-btn" onclick="chooseVerifyStatus('Needs Work')">Needs Work</button>
-            <button type="button" id="verify-tops" class="verify-choice-btn" onclick="chooseVerifyStatus('Tops Alhamdullilah')">Tops Alhamdullilah</button>
-          </div>
-        </div>
+        <label id="dhor-status-label" for="dhor-status">Verify Status</label>
+        <select id="dhor-status">
+          <option value="Pending">Pending</option>
+          <option value="Verified">Verified</option>
+          <option value="Needs Review">Needs Review</option>
+        </select>
 
         <button id="save-dhor-btn" onclick="saveDhorEntry()">Save Dhor Entry</button>
+        <p id="dhor-sync-status" class="sync-status mini-text"></p>
         <p id="dhor-form-message" class="helper-text"></p>
       </div>
     </section>
@@ -81,8 +107,17 @@
     <section id="dhor-list-screen" class="screen">
       <div class="nav-header">
         <h2 id="dhor-list-title">Dhor Progress</h2>
-        <button class="small-btn" onclick="openDhorForm()">Record</button>
+        <button class="small-btn" onclick="goHome()">Back</button>
       </div>
+
+      <div id="admin-filter-box" class="dashboard-section hidden">
+        <label for="admin-username-filter">Filter by username</label>
+        <div class="filter-row">
+          <input id="admin-username-filter" type="text" placeholder="Leave blank for all students" />
+          <button class="small-btn" onclick="loadDhorRecords()">Filter</button>
+        </div>
+      </div>
+
       <div id="dhor-summary" class="summary-grid"></div>
       <div id="dhor-record-list" class="list-stack"><p class="helper-text">Loading...</p></div>
     </section>
